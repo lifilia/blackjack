@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blackjack Spiel</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div id="game-container">
+    <h1>Blackjack</h1>
+
+    <!-- Anzeige der Chips des Spielers -->
+    <div id="chip-container">
+      <p>Chips: <span id="chip-count">1000</span></p>
+    </div>
+
+    <!-- Spielfeld -->
+    <div id="game-board">
+      <div id="dealer-hand">
+        <h2>Dealer</h2>
+        <div id="dealer-cards">
+          <!-- Dealer Karten werden hier angezeigt -->
+        </div>
+      </div>
+
+      <div id="player-hand">
+        <h2>Spieler</h2>
+        <div id="player-cards">
+          <!-- Spieler Karten werden hier angezeigt -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Steuerbuttons -->
+    <div id="controls">
+      <button id="hit-btn">Hit</button>
+      <button id="stand-btn">Stand</button>
+      <button id="double-btn">Double</button>
+      <button id="split-btn">Split</button>
+    </div>
+
+    <!-- Gewinner und Neustart -->
+    <div id="game-result" style="display:none;">
+      <p id="result-message"></p>
+      <button id="restart-btn">Neustart</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
