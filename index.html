@@ -1,53 +1,49 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Blackjack Spiel</title>
+  <title>Blackjack</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-  <div id="game-container">
+  <div id="game">
     <h1>Blackjack</h1>
-
-    <!-- Anzeige der Chips des Spielers -->
-    <div id="chip-container">
-      <p>Chips: <span id="chip-count">1000</span></p>
+    <div id="game-info">
+  <h3>Spielanleitung</h3>
+  <ul>
+    <li><strong>Hit:</strong> Ziehe eine weitere Karte.</li>
+    <li><strong>Stand:</strong> Behalte deine Hand und lass den Dealer spielen.</li>
+    <li><strong>Double:</strong> Verdopple deinen Einsatz und ziehe eine Karte.</li>
+    <li><strong>Split:</strong> Teile deine Hand, wenn die ersten beiden Karten den gleichen Wert haben.</li>
+  </ul>
+</div>
+<div id="game-log">
+  <h3>Spielverlauf</h3>
+</div>
+    <p>Deine Chips: <span id="chip-count">1000</span></p>
+    <div>
+      <label for="bet-input">Einsatz:</label>
+      <input type="number" id="bet-input" min="100" step="100" value="100">
+      <button id="set-bet-btn">Setzen</button>
     </div>
-
-    <!-- Spielfeld -->
-    <div id="game-board">
-      <div id="dealer-hand">
-        <h2>Dealer</h2>
-        <div id="dealer-cards">
-          <!-- Dealer Karten werden hier angezeigt -->
-        </div>
-      </div>
-
-      <div id="player-hand">
-        <h2>Spieler</h2>
-        <div id="player-cards">
-          <!-- Spieler Karten werden hier angezeigt -->
-        </div>
-      </div>
+    <div>
+      <h2>Deine Karten:</h2>
+      <div id="player-cards"></div>
     </div>
-
-    <!-- Steuerbuttons -->
-    <div id="controls">
-      <button id="hit-btn">Hit</button>
-      <button id="stand-btn">Stand</button>
-      <button id="double-btn">Double</button>
-      <button id="split-btn">Split</button>
+    <div>
+      <h2>Dealer-Karten:</h2>
+      <div id="dealer-cards"></div>
     </div>
-
-    <!-- Gewinner und Neustart -->
+    <button id="hit-btn">Hit</button>
+    <button id="stand-btn">Stand</button>
+    <button id="double-btn">Double</button>
+    <button id="split-btn">Split</button>
     <div id="game-result" style="display:none;">
-      <p id="result-message"></p>
-      <button id="restart-btn">Neustart</button>
+      <h2 id="result-message"></h2>
     </div>
+    <button id="restart-btn" style="display:none;">Neustart</button>
   </div>
-
   <script src="app.js"></script>
 </body>
 </html>

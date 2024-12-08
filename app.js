@@ -5,11 +5,20 @@ let dealerCards = [];
 let playerHandValue = 0;
 let dealerHandValue = 0;
 let playerHasSplit = false;
+let currentBet = 100;
 
 // Kartenstapel 
 const suits = ['Hearts', 'Diamonds', 'Clubs', 'Spades'];
 const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
 let deck = [];
+
+let gameLog = [];
+
+function updateGameLog(message) {
+  gameLog.push(message);
+  const gameLogElement = document.getElementById('game-log');
+  gameLogElement.innerHTML = gameLog.map(log => `<p>${log}</p>`).join('');
+}
 
 // HTML-Elemente
 const chipCountElement = document.getElementById('chip-count');
@@ -22,6 +31,8 @@ const splitButton = document.getElementById('split-btn');
 const gameResultElement = document.getElementById('game-result');
 const resultMessageElement = document.getElementById('result-message');
 const restartButton = document.getElementById('restart-btn');
+const betInput = document.getElementById('bet-input');
+const setBetButton = document.getElementById('set-bet-btn');
 
 // Funktion, um das Deck zu erstellen
 function createDeck() {
@@ -76,15 +87,15 @@ function calculateHandValue(cards) {
   return totalValue;
 }
 
-// Funktion, um die Karten anzuzeigen
+// Funktion, um die Karten und Chips anzuzeigen
 function updateCardDisplay() {
   playerCardsElement.innerHTML = playerCards.map(card => `<span>${card.value} of ${card.suit}</span>`).join('<br>');
   dealerCardsElement.innerHTML = dealerCards.map(card => `<span>${card.value} of ${card.suit}</span>`).join('<br>');
   chipCountElement.textContent = playerChips;
 }
 
-// Funktion, um das Spiel zu starten
-function startGame() {
+// Funktion, um das Spiel zu starten oder zurückzusetzen
+function resetGame() {
   playerCards = [];
   dealerCards = [];
   playerHandValue = 0;
@@ -92,9 +103,12 @@ function startGame() {
   playerHasSplit = false;
 
   createDeck();
-  playerChips = 1000;
-  chipCountElement.textContent = playerChips;
+
   gameResultElement.style.display = 'none';
+  hitButton.disabled = false;
+  standButton.disabled = false;
+  doubleButton.disabled = false;
+  splitButton.disabled = false;
 
   // Initiale Karten ziehen
   playerCards.push(drawCard(), drawCard());
@@ -104,90 +118,84 @@ function startGame() {
   dealerHandValue = calculateHandValue(dealerCards);
 
   updateCardDisplay();
-
-  // Button-Status zurücksetzen
-  hitButton.disabled = false;
-  standButton.disabled = false;
-  doubleButton.disabled = false;
-  splitButton.disabled = false;
 }
 
-// Funktion, um den Gewinner zu ermitteln
-function determineWinner() {
-  if (playerHandValue > 21) {
-    return 'Du hast verloren! Überzogen!';
-  } else if (dealerHandValue > 21) {
-    return 'Dealer hat verloren! Du gewinnst!';
-  } else if (playerHandValue > dealerHandValue) {
-    return 'Du gewinnst!';
-  } else if (playerHandValue < dealerHandValue) {
-    return 'Du hast verloren!';
-  } else {
-    return 'Unentschieden!';
+// Funktion, um den Spielstatus zu prüfen
+function checkGameStatus() {
+  if (playerChips < 100) {
+    alert('Du hast weniger als 100 Chips. Das Spiel wird zurückgesetzt!');
+    playerChips = 1000; // Chips auf Standardwert zurücksetzen
+    resetGame();
+  } else if (playerChips >= 10000) {
+    alert('Herzlichen Glückwunsch! Du hast 10.000 Chips erreicht!');
+    restartButton.style.display = 'block';
   }
 }
 
+// Setzen des Einsatzes
+setBetButton.addEventListener('click', () => {
+  const betValue = parseInt(betInput.value);
+  if (betValue >= 100 && betValue <= playerChips) {
+    currentBet = betValue;
+    alert(`Einsatz gesetzt: ${currentBet} Chips`);
+  } else {
+    alert('Ungültiger Einsatz. Bitte mindestens 100 Chips setzen und nicht mehr als du besitzt.');
+  }
+});
+
 // Event-Listener für den "Hit"-Button
 hitButton.addEventListener('click', () => {
-  if (playerChips >= 100) {
-    playerCards.push(drawCard());
-    playerHandValue = calculateHandValue(playerCards);
-    updateCardDisplay();
+  playerCards.push(drawCard());
+  playerHandValue = calculateHandValue(playerCards);
+  updateCardDisplay();
 
-    if (playerHandValue > 21) {
-      resultMessageElement.textContent = 'Du hast verloren! Überzogen!';
-      gameResultElement.style.display = 'block';
-    }
+  if (playerHandValue > 21) {
+    playerChips -= currentBet;
+    resultMessageElement.textContent = 'Du hast verloren! Überzogen!';
+    gameResultElement.style.display = 'block';
+    resetGame();
+    checkGameStatus();
   }
 });
 
 // Event-Listener für den "Stand"-Button
 standButton.addEventListener('click', () => {
-  while (dealerHandValue < 17) {
+  while (dealerHandValue < 17 || (dealerHandValue === 17 && dealerCards.some(card => card.value === 'A'))) {
     dealerCards.push(drawCard());
     dealerHandValue = calculateHandValue(dealerCards);
   }
 
-  const resultMessage = determineWinner();
-  resultMessageElement.textContent = resultMessage;
+  if (playerHandValue > dealerHandValue || dealerHandValue > 21) {
+    endRound('win');
+  } else if (playerHandValue < dealerHandValue) {
+    endRound('lose');
+  } else {
+    endRound('draw');
+  }
+});
+
+
+// Neustart
+restartButton.addEventListener('click', resetGame);
+
+// Beendet Spiel
+resetGame();
+
+function endRound(result) {
+  if (result === 'win') {
+    playerChips += currentBet;
+    updateGameLog(`Du hast gewonnen und ${currentBet * 2} Chips erhalten!`);
+    resultMessageElement.textContent = 'Du gewinnst!';
+  } else if (result === 'lose') {
+    playerChips -= currentBet;
+    updateGameLog(`Du hast verloren und ${currentBet} Chips verloren.`);
+    resultMessageElement.textContent = 'Du hast verloren!';
+  } else {
+    updateGameLog(`Unentschieden, dein Einsatz wurde zurückerstattet.`);
+    resultMessageElement.textContent = 'Unentschieden!';
+  }
+
   gameResultElement.style.display = 'block';
-
-  hitButton.disabled = true;
-  standButton.disabled = true;
-  doubleButton.disabled = true;
-  splitButton.disabled = true;
-});
-
-// Event-Listener für den "Double"-Button
-doubleButton.addEventListener('click', () => {
-  if (playerChips >= 200) {
-    playerChips -= 100;
-    playerCards.push(drawCard());
-    playerHandValue = calculateHandValue(playerCards);
-    updateCardDisplay();
-
-    if (playerHandValue > 21) {
-      resultMessageElement.textContent = 'Du hast verloren! Überzogen!';
-      gameResultElement.style.display = 'block';
-    } else {
-      standButton.click();
-    }
-  }
-});
-
-// Event-Listener für den "Split"-Button
-splitButton.addEventListener('click', () => {
-  if (playerCards[0].value === playerCards[1].value) {
-    // Splitting logic
-    playerHasSplit = true;
-    playerCards.push(drawCard());
-    playerHandValue = calculateHandValue(playerCards);
-    updateCardDisplay();
-  }
-});
-
-// Event-Listener für den "Neustart"-Button
-restartButton.addEventListener('click', startGame);
-
-// Das Spiel beim Laden der Seite starten
-startGame();
+  resetGame();
+  checkGameStatus();
+}
